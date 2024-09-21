@@ -24,13 +24,8 @@ pin: PD15
 max_power: 1.0
 kick_start_time: 0.5
 
-[heater_fan bed_fan]
-pin: PD14
-max_power: 1.0
-heater: heater_bed
-heater_temp: 100.0
-
-#NEVERMORE FAN IS DEFINED IN SEPERATE FILE CALLED nevermore.cfg
+#NEVERMORE FAN IS DEFINED IN SEPARATE FILE CALLED nevermore.cfg
+#BED FANS ARE DEFINED IN A SEPARATE FILE CALLED bedfans.cfg
 
 ########################################
 ##          Macros
@@ -65,21 +60,21 @@ gcode:
 
 ##  Copied from zellneralex, works.
 ##  Chamber Ventilation Control in Mainsail
-[gcode_macro M141]
-description: Set temperature of chamber fan. Usage M141 [S=target_temp(0)]
-gcode: 
-    SET_TEMPERATURE_FAN_TARGET temperature_fan=chamber target={params.S|default(0)}
+#[gcode_macro M141]
+#description: Set temperature of chamber fan. Usage M141 [S=target_temp(0)]
+#gcode: 
+#    SET_TEMPERATURE_FAN_TARGET temperature_fan=chamber target={params.S|default(0)}
 
-[gcode_macro VENT]
-description: Toggle Chamber fan
-gcode:
-    {% if printer['temperature_fan chamber'].target|float > 0 and 
-          printer['temperature_fan chamber'].target|float <= printer['gcode_macro _USER_VARIABLE'].peripheral.vent.on_val|float %}
-        M141
-    {% else %}
-        M141 S{printer['gcode_macro _USER_VARIABLE'].peripheral.vent.on_val}
-    {% endif %}
-    _VENT_INFO
+#[gcode_macro VENT]
+#description: Toggle Chamber fan
+#gcode:
+#    {% if printer['heater_fan bed_fan'].target|float > 0 and 
+#          printer['heater_fan bed_fan'].target|float <= printer['gcode_macro _USER_VARIABLE'].peripheral.vent.on_val|float %}
+#        M141
+#    {% else %}
+#        M141 S{printer['gcode_macro _USER_VARIABLE'].peripheral.vent.on_val}
+#    {% endif %}
+#    _VENT_INFO
 
 [delayed_gcode _DELAY_VENT_OFF]
 gcode:
@@ -89,8 +84,9 @@ gcode:
   {% endif %}
 
 [gcode_macro _VENT_INFO]
-description: Helper: Print chamber fan temperature
+#description: Helper: Print chamber fan temperature
 gcode:
-  {% set txt = "off" if printer['temperature_fan chamber'].target == 0 
-          else "target temp: %2dC" % printer['temperature_fan chamber'].target %}
+  {% set txt = "off" if printer['heater_fan bed_fan'].target == 0 
+          else "target temp: %2dC" % printer['heater_fan bed_fan'].target %}
   {action_respond_info("Chamber fan %s" % txt)}
+
