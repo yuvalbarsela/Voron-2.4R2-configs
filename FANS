@@ -9,8 +9,8 @@ kick_start_time: 0.5
 off_below: 0.10
 
 [heater_fan hotend_fan]
-##  Hotend Fan HE3
-pin: PB11
+##  Hotend Fan FAN0
+pin: PA8
 max_power: 1.0
 heater: extruder
 heater_temp: 50.0
