@@ -47,9 +47,9 @@ gcode:
 [delayed_gcode skirt_fan]
 gcode:
   {% if printer.print_stats.state|lower != "printing" %}
-    {% if printer['temperature_sensor pi_4_mcu'].temperature >= 50 %}
+    {% if printer['temperature_sensor raspberry_pi'].temperature >= 50 %}
       SET_FAN_SPEED FAN=controller_fan SPEED=1
-    {% elif  printer['temperature_sensor pi_4_mcu'].temperature < 40 %}
+    {% elif  printer['temperature_sensor raspberry_pi'].temperature < 40 %}
       SET_FAN_SPEED FAN=controller_fan SPEED=0
     {% endif %}
   {% else %}
