@@ -4,13 +4,13 @@
 
 [fan]
 ##  Print Cooling Fan - FAN1
-pin: PE5
+pin: EBB:gpio4
 kick_start_time: 0.5
 off_below: 0.10
 
 [heater_fan hotend_fan]
 ##  Hotend Fan FAN0
-pin: PA8
+pin: EBB:gpio14
 max_power: 1.0
 heater: extruder
 heater_temp: 50.0
@@ -47,15 +47,15 @@ gcode:
 [delayed_gcode skirt_fan]
 gcode:
   {% if printer.print_stats.state|lower != "printing" %}
-    {% if printer['temperature_sensor raspberry_pi'].temperature >= 50 %}
+    {% if printer['temperature_sensor raspberry_pi'].temperature >= 60 %}
       SET_FAN_SPEED FAN=controller_fan SPEED=1
-    {% elif  printer['temperature_sensor raspberry_pi'].temperature < 40 %}
+    {% elif  printer['temperature_sensor raspberry_pi'].temperature < 55 %}
       SET_FAN_SPEED FAN=controller_fan SPEED=0
     {% endif %}
   {% else %}
     SET_FAN_SPEED FAN=controller_fan SPEED=1
   {% endif %}
-  UPDATE_DELAYED_GCODE ID=skirt_fan DURATION=300
+  UPDATE_DELAYED_GCODE ID=skirt_fan DURATION=30
 
 
 ##  Copied from zellneralex, works.
