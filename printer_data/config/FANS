@@ -1,0 +1,99 @@
+#####################################################################
+#   Fan Control
+#####################################################################
+
+#[fan]
+##  Print Cooling Fan - FAN1
+#pin: nhk:gpio6
+#kick_start_time: 0.5
+#off_below: 0.10
+
+#[heater_fan hotend_fan]
+##  Hotend Fan FAN0
+#pin: nhk:gpio5
+#max_power: 1.0
+#heater: extruder
+#heater_temp: 50.0
+#fan_speed: 0.65
+#kick_start_time: 0.5
+
+[fan_generic controller_fan]
+#  Controller fan - FAN2
+#  Generic so it can be controlled via delayed_gcode
+pin: PD15
+max_power: 1.0
+kick_start_time: 0.5
+
+#[fan_generic tmc5160_fan]
+#Controller fan - FAN1
+#Generic so it can be controlled via delayed_gcode
+#pin: VF6
+#max_power: 1.0
+#kick_start_time: 0.5
+
+#NEVERMORE FAN IS DEFINED IN SEPARATE FILE CALLED nevermore.cfg
+#BED FANS ARE DEFINED IN A SEPARATE FILE CALLED bedfans.cfg
+
+########################################
+##          Macros
+########################################
+
+# Start Pi temp monitoring loop.
+[delayed_gcode skirt_fan_boot]
+initial_duration: 1.0
+gcode:
+  {% if printer.print_stats.state|lower != "printing" %}
+    SET_FAN_SPEED FAN=controller_fan SPEED=0.0
+  {% else %}
+    SET_FAN_SPEED FAN=controller_fan SPEED=0.75 #just so I can see if this is getting called
+  {% endif %}
+  UPDATE_DELAYED_GCODE ID=skirt_fan DURATION=5
+
+
+# Pi temperature monitoring loop. Check temp every 5 minutes & turn on skirt fans if too hot. Turn off if cool.
+[delayed_gcode skirt_fan]
+gcode:
+  {% if printer.print_stats.state|lower != "printing" %}
+    {% if printer['temperature_sensor raspberry_pi'].temperature >= 60 %}
+      SET_FAN_SPEED FAN=controller_fan SPEED=1
+    {% elif  printer['temperature_sensor raspberry_pi'].temperature < 55 %}
+      SET_FAN_SPEED FAN=controller_fan SPEED=0
+    {% endif %}
+  {% else %}
+    SET_FAN_SPEED FAN=controller_fan SPEED=1
+  {% endif %}
+  UPDATE_DELAYED_GCODE ID=skirt_fan DURATION=30
+
+
+##  Copied from zellneralex, works.
+##  Chamber Ventilation Control in Mainsail
+#[gcode_macro M141]
+#description: Set temperature of chamber fan. Usage M141 [S=target_temp(0)]
+#gcode: 
+#    SET_TEMPERATURE_FAN_TARGET temperature_fan=chamber target={params.S|default(0)}
+
+#[gcode_macro VENT]
+#description: Toggle Chamber fan
+#gcode:
+#    {% if printer['heater_fan bed_fan'].target|float > 0 and 
+#          printer['heater_fan bed_fan'].target|float <= printer['gcode_macro _USER_VARIABLE'].peripheral.vent.on_val|float %}
+#        M141
+#    {% else %}
+#        M141 S{printer['gcode_macro _USER_VARIABLE'].peripheral.vent.on_val}
+#    {% endif %}
+#    _VENT_INFO
+
+[delayed_gcode _DELAY_VENT_OFF]
+gcode:
+  {% if printer.print_stats.state|lower != "paused" and printer.print_stats.state|lower != "printing" %}
+    M141
+    _VENT_INFO
+  {% endif %}
+
+[gcode_macro _VENT_INFO]
+#description: Helper: Print chamber fan temperature
+gcode:
+  {% set txt = "off" if printer['heater_fan bed_fan'].target == 0 
+          else "target temp: %2dC" % printer['heater_fan bed_fan'].target %}
+  {action_respond_info("Chamber fan %s" % txt)}
+
