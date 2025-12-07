@@ -20,7 +20,7 @@
 [fan_generic controller_fan]
 #  Controller fan - FAN2
 #  Generic so it can be controlled via delayed_gcode
-pin: PD15
+pin: PD12
 max_power: 1.0
 kick_start_time: 0.5
 
