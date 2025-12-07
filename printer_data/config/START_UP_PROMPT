@@ -1,0 +1,10 @@
+[delayed_gcode STARTUP_PROMPT]
+#description: "Prompt on startup to ask if you want to home all axes"
+gcode:
+initial_duration: 1
+  #RESPOND TYPE=command MSG="action:prompt_begin Start-up Homing"
+  #RESPOND TYPE=command MSG="action:prompt_text Home All Axes?"
+  #RESPOND TYPE=command MSG="action:prompt_button YES|G28"
+  #RESPOND TYPE=command MSG="action:prompt_button_group_end"
+  #RESPOND TYPE=command MSG="action:prompt_show"
+  M117 Welcome
